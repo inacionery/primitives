@@ -164,7 +164,7 @@ describe('reopening while animating out', () => {
   });
 
   it('should close when focus moves outside after an outside click closed it before it reopened', async () => {
-    render(<AnimatingPopover animatingOut />);
+    const { rerender } = render(<AnimatingPopover animatingOut />);
     await waitForDocumentPointerDownListener();
     const trigger = screen.getByText(TRIGGER_TEXT);
     const outside = screen.getByText(OUTSIDE_TEXT);
@@ -178,6 +178,14 @@ describe('reopening while animating out', () => {
     act(() => outside.focus());
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    rerender(<AnimatingPopover animatingOut={false} />);
+    // `FocusScope` moves focus on unmount in a `setTimeout`.
+    await act(async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    });
+
+    expect(outside).toHaveFocus();
   });
 });
 
